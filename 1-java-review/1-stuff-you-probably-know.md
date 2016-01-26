@@ -1,6 +1,6 @@
-# Stuff You Probably Know
+Prepared by Linan Qiu <[lq2137@columbia.edu](lq2137@columbia.edu)>
 
-Before we start on data structures, let's get that rust off our Java.
+# Stuff You Probably Know
 
 ## Java Language
 
@@ -50,7 +50,36 @@ In this way, an user won't have to care about where the document was published, 
 
 ## Primitives
 
-Primitives are Java's built-in data types. There are 8 of them: `byte`, `short`, `int`, `long`, `float`, `double`, `boolean`, `char`. Yup. Nothing more to be said for now.
+Primitives are Java's built-in data types. There are 8 of them: `byte`, `short`, `int`, `long`, `float`, `double`, `boolean`, `char`.
+
+Convince yourself that the following is true:
+
+### 1. Downcasting Can Be Done Directly
+
+```java
+// in a main method far far away
+
+double x = 1.11;
+int y = x;
+System.out.println(y); // prints 1
+```
+
+### 2. Upcasting Has To Be Explicit
+
+```java
+// in a main method far far away
+
+int x = 1;
+double y = x; // the compiler will say:
+// Type mismatch: cannot convert from double to int
+
+// instead you'll have to do
+double y = (double) x;
+```
+
+### 3. `char`s are `int`s in Disguise
+
+Review ASCII.
 
 ## Classes
 
@@ -84,7 +113,7 @@ public class Jedi {
 
 To avoid making this set of notes too long, **convince yourself that the following is true**:
 
-### Function Scope and `this` Keyword
+### 1. Function Scope and `this` Keyword
 
 You can change the constructor to:
 
@@ -97,7 +126,7 @@ public Jedi(String name, int lightsaberCount) {
 
 And the code will still be exactly the same. In fact, this is recommended. Way neater and readable.
 
-### Instanting Classes into Objects
+### 2. Instanting Classes into Objects
 
 In another class (say `Test.java`), you can do the following:
 
@@ -150,7 +179,7 @@ public class Jedi {
 }
 ```
 
-### `public` and `private` Variables
+### 3. `public` and `private` Variables
 
 In the main method, you can do this:
 
