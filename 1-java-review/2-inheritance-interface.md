@@ -32,7 +32,7 @@ Now in your test class, you have:
 public class Test {
   public static void main(String[] args) {
     Person tom = new Person("Tom");
-    paul.sayName(); // should print Tom
+    tom.sayName(); // should print Tom
   }
 }
 ```
