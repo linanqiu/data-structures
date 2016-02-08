@@ -266,6 +266,6 @@ public class ShinyPokemon extends Pokemon {
 
 Now if I have a list of Pokemon AND ShinyPokemon, `Collections.sort` should be able to compare them against each other right? However, note that `ShinyPokemon` doesn't actually directly implement the `Comparable` interface. It only extends `Pokemon` which implements the `Comparable<Pokemon>` interface. There's no `ShinyPokemon implements Comparable<ShinyPokemon>`. In fact, there won't be a `Comparable<ShinyPokemon>`. Then, we'd want to tell Java to allow comparing of `ShinyPokemon` and `Pokemon`. Or more generally, allow any class whose super class implements `Comparable<Pokemon>`. This is exactly what our lower bound wildcard says.
 
-Hence, the `<T extends Comparable<? super T>>` says to allow any type `T` that implements `Comparable<Something>` where `Something` is a superclass of `T`. In our instance, `T` will be `Pokemon` and since `ShinyPokemon` is a superclass of `Pokemon`, this signature matches.
+Hence, the `<T extends Comparable<? super T>>` says to allow any type `T` that implements `Comparable<Something>` where `Something` is a superclass of `T`. In our instance, `T` will be `ShinyPokemon` and since `Pokemon` is a superclass of `ShinyPokemon`, this signature matches.
 
 Now you see how upper, unbounded, and lower bound wildcards pretty much catch them all. (Very bad pun intended)
