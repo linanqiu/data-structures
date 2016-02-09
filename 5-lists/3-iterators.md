@@ -205,6 +205,10 @@ Well, turns out it isn't difficult to accomplish that. We just need to make use 
 
 ## Returning an Iterator Instance from `AwsmArrayList`
 
+We can modify `AwsmArrayList`'s `iterator` method to return an instance of `AwsmArrayListIterator`. (read the previous sentence again and let that sink in). Now that specific instance of `AwsmArrayListIterator` needs an instance of `AwsmArrayList` in its constructor. Let's see what this means.
+
+Let's say I have a `AwsmArrayList<Integer> listA = new AwsmArrayList<>()`. Now within `listA`, I need a way to create an instance of `AwsmArrayListIterator` and pass it `listA`. However, I have to do this within `listA` and within `listA`, I don't have the `listA` variable. Instead, you have to use the `this` variable.
+
 ```java
 // AwsmArrayList.java
 
@@ -232,8 +236,272 @@ public class AwsmArrayList<T> implements AwsmList<T> {
 
   @Override
   public Iterator<T> iterator() {
-    // AwsmArrayList<T> currentList = this;
+    AwsmArrayList<T> currentList = this;
+    Iterator<T> ite = new AwsmArrayListIterator<T>(currentList);
+    return ite;
+  }
+}
+```
+
+Within the `iterator` method, we have obtained a reference to the current instance of `AwsmArrayList` using the `this` variable. We then pass it to the constructor of an `AwsmArrayListIterator`, then return the iterator instance.
+
+This means we can now do this:
+
+```java
+// in a main method far far away
+
+AwsmArrayList<Integer> listA = new AwsmArrayList<>();
+for (int i = 0; i < 100; i++) {
+  listA.addLast(i);
+}
+Iterator<Integer> listAIterator = listA.iterator();
+while(listAIterator.hasNext()) {
+  System.out.println(listAIterator.next());
+}
+```
+
+In fact, we can even ask for multiple instances of the iterator for the same `listA`:
+
+```java
+// in a main method far far away
+
+AwsmArrayList<Integer> listA = new AwsmArrayList<>();
+for (int i = 0; i < 100; i++) {
+  listA.addLast(i);
+}
+Iterator<Integer> listAIterator = listA.iterator();
+while (listAIterator.hasNext()) {
+  System.out.println(listAIterator.next());
+}
+
+Iterator<Integer> anotherListAIterator = listA.iterator();
+while (anotherListAIterator.hasNext()) {
+  System.out.println(anotherListAIterator.next() * 2);
+}
+```
+
+`listAIterator` is independent of `anotherListAIterator` -- they simply traverse the same list (`listA`) but have completely separate positions. It's like two people jumping the same train!
+
+The routine in the `iterator` method is slightly convoluted. We can shorten it:
+
+```java
+// AwsmArrayList.java
+
+import java.util.Iterator;
+
+public class AwsmArrayList<T> implements AwsmList<T> {
+
+  private T[] data;
+  private int size;
+
+  public static final int INITIAL_SIZE = 8;
+  public static final int GROWTH_FACTOR = 2;
+
+  @SuppressWarnings("unchecked")
+  public AwsmArrayList(int length) {
+    data = (T[]) new Object[length];
+    size = 0;
+  }
+
+  public AwsmArrayList() {
+    this(INITIAL_SIZE);
+  }
+
+  // ... other methods redacted
+
+  @Override
+  public Iterator<T> iterator() {
     return new AwsmArrayListIterator<T>(this);
   }
 }
 ```
+
+This simply says "create a new instance of `AwsmArrayListIterator` using `this` as an argument to the constructor, and return it immediately as an `Iterator` since `AwsmArrayListIterator` implements the `Iterator` interface".
+
+## Making Iterator an Inner Class
+
+Since `AwsmArrayListIterator` as a class is only ever going to be used by `AwsmArrayList`, it makes sense to put `AwsmArrayListIterator` inside the `AwsmArrayList` class.
+
+> I gloss over the details of inner classes. If you want a slightly more rigorous introduction (I highly recommend so. This is a very easy to understand piece that will take 2 min to finish), please read [https://docs.oracle.com/javase/tutorial/java/javaOO/nested.html](https://docs.oracle.com/javase/tutorial/java/javaOO/nested.html)
+
+We can do so like this:
+
+```java
+// AwsmArrayList.java
+
+import java.util.Iterator;
+
+public class AwsmArrayList<T> implements AwsmList<T> {
+
+  private T[] data;
+  private int size;
+
+  public static final int INITIAL_SIZE = 8;
+  public static final int GROWTH_FACTOR = 2;
+
+  @SuppressWarnings("unchecked")
+  public AwsmArrayList(int length) {
+    data = (T[]) new Object[length];
+    size = 0;
+  }
+
+  public AwsmArrayList() {
+    this(INITIAL_SIZE);
+  }
+
+  @Override
+  public void addFirst(T item) {
+    add(item, 0);
+  }
+
+  @Override
+  public void addLast(T item) {
+    add(item, size);
+  }
+
+  // ... other methods redacted
+
+  @Override
+  public Iterator<T> iterator() {
+    // AwsmArrayList<T> currentList = this;
+    return new AwsmArrayListIterator<T>(this);
+  }
+
+  public class AwsmArrayListIterator<T> implements Iterator<T> {
+
+    private int index;
+    private AwsmArrayList<T> list;
+
+    public AwsmArrayListIterator(AwsmArrayList<T> list) {
+      this.list = list;
+      index = 0;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return index < list.size();
+    }
+
+    @Override
+    public T next() {
+      if (index >= list.size()) {
+        throw new IndexOutOfBoundsException();
+      }
+      T item = list.get(index);
+      index++;
+      return item;
+    }
+  }
+
+  public static void main(String[] args) {
+    // ... test procedure
+  }
+}
+```
+
+This changes nothing other than that in a main method, we cannot do this:
+
+```java
+// in a main method far far away
+
+AwsmArrayList<String> listB = new AwsmArrayList<>();
+listB.addLast("pikachu");
+listB.addLast("mew");
+listB.addLast("bulbasaur");
+
+// the next line will cause a compile time error
+// since the AwsmArrayListIterator class no longer exists independently
+AwsmArrayListIterator<String> listBIterator = new AwsmArrayListIterator<>(listB);
+while (listBIterator.hasNext()) {
+  System.out.println(listBIterator.next());
+}
+
+// we can still do this
+// since we are not instantiating a AwsmArrayListIterator in this main method
+AwsmArrayList<Integer> listA = new AwsmArrayList<>();
+for (int i = 0; i < 100; i++) {
+  listA.addLast(i);
+}
+Iterator<Integer> listAIterator = listA.iterator();
+while (listAIterator.hasNext()) {
+  System.out.println(listAIterator.next());
+}
+
+Iterator<Integer> anotherListAIterator = listA.iterator();
+while (anotherListAIterator.hasNext()) {
+  System.out.println(anotherListAIterator.next() * 2);
+}
+```
+
+This is simply to prevent users from doing silly stuff (by limiting the damage they can do). This is a recurring theme in life.
+
+## Implementing the Iterable Interface
+
+You'd remember that for the Java `ArrayList`, we can do this:
+
+```java
+// in a main method far far away
+
+ArrayList<Integer> list = new ArrayList<>();
+list.add(1);
+list.add(2);
+list.add(3);
+
+for (Integer item : list) {
+  System.out.println(item);
+}
+```
+
+This is an **enhanced for loop**. However, if you try to do the same for `AwsmArrayList`, you'd get an error. This is because `AwsmArrayList` is not iterable.
+
+`Iterable<T>` is a special interface that allows an object to be iterated over in an enhanced for loop. All it requires is that the object has the `iterator()` method that returns an `Iterator<T>`. Why? Well let's take a look at the method above for `ArrayList`. It is essentially the same functionally as this:
+
+```java
+// in a main method far far away
+
+ArrayList<Integer> list = new ArrayList<>();
+list.add(1);
+list.add(2);
+list.add(3);
+
+// ArrayList implements Iterable, so it has a iterator() method
+Iterator<Integer> listIte = list.iterator();
+while (listIte.hasNext()) {
+  System.out.println(listIte.next());
+}
+```
+
+In fact, what Java does in the background is that it translates the enhanced for loop into this while loop when it compiles the code. This is why Java insists that only classes that implement `Iterable<T>` can be used in an enhanced for loop -- **Java needs to guarantee that there is a `iterator` method in the class!**
+
+Now this is awsm for our `AwsmArrayList` since we already have the `iterator()` method. Hence, all we need to do is to make `AwsmArrayList` implement `Iterable<T>` and we'll be able to use it in an enhanced for loop. This only involves adding the two words `implements Iterable<T>` to the top of the class and we're done.
+
+```java
+// AwsmArrayList.java
+
+import java.util.Iterator;
+
+public class AwsmArrayList<T> implements AwsmList<T>, Iterable<T> {
+
+  // ... entire class content redacted
+}
+```
+
+Now, we can use our `AwsmArrayList` in an enhanced for loop that is really awesome and convenient (and allows us to be lazy!).
+
+```java
+// Test.java
+
+public class Test {
+  public static void main(String[] args) {
+    AwsmArrayList<Integer> listA = new AwsmArrayList<>();
+    for (int i = 0; i < 100; i++) {
+      listA.addLast(i);
+    }
+    for (Integer item : listA) {
+      System.out.println(item);
+    }
+  }
+}
+```
+
+High five yourself right now. We just completed a huge behemoth called `AwsmArrayList` and you deserve that. I really encourage you to implement this again from scratch (I'm only comfortable with this the third time I do it. The first time was a total failure, the second time was a total failure (in front of a class of recitation students) So learn from my embarrassment `:p`)

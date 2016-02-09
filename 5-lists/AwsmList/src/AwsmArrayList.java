@@ -1,6 +1,6 @@
 import java.util.Iterator;
 
-public class AwsmArrayList<T> implements AwsmList<T> {
+public class AwsmArrayList<T> implements AwsmList<T>, Iterable<T> {
 
   private T[] data;
   private int size;
@@ -135,6 +135,32 @@ public class AwsmArrayList<T> implements AwsmList<T> {
   public Iterator<T> iterator() {
     // AwsmArrayList<T> currentList = this;
     return new AwsmArrayListIterator<T>(this);
+  }
+
+  public class AwsmArrayListIterator<T> implements Iterator<T> {
+
+    private int index;
+    private AwsmArrayList<T> list;
+
+    public AwsmArrayListIterator(AwsmArrayList<T> list) {
+      this.list = list;
+      index = 0;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return index < list.size();
+    }
+
+    @Override
+    public T next() {
+      if (index >= list.size()) {
+        throw new IndexOutOfBoundsException();
+      }
+      T item = list.get(index);
+      index++;
+      return item;
+    }
   }
 
   public static void main(String[] args) {
