@@ -1,0 +1,2 @@
+- What are queues
+- Implementing queues using lists: Arraylist and Linkedlist. LInked list definitely better than array list. Arraylist removeFirst is O(N)

@@ -1,0 +1,2 @@
+- Refactoring AwsmArrayListIterator into AwsmArrayList
+- Explaining difference between static and non-static nested classes and when to use which https://docs.oracle.com/javase/tutorial/java/javaOO/nested.html

@@ -1,0 +1,3 @@
+- What are stacks
+- Our own stack interface!
+- Implement stacks using lists: comparison between arraylist and linked list. Same **amortized** runtime (since arraylist expands every now and then)
