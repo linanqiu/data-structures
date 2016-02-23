@@ -3,10 +3,12 @@ import java.util.Iterator;
 public class AwsmLinkedList<T> implements AwsmList<T>, Iterable<T> {
 
   private AwsmNode<T> head;
+  private AwsmNode<T> tail;
   private int size;
 
   public AwsmLinkedList() {
-    head = new AwsmNode<>(null, null);
+    tail = new AwsmNode<>(null, null);
+    head = new AwsmNode<>(null, tail);
     size = 0;
   }
 
@@ -17,7 +19,10 @@ public class AwsmLinkedList<T> implements AwsmList<T>, Iterable<T> {
 
   @Override
   public void addLast(T item) {
-    add(item, size);
+    tail.data = item;
+    AwsmNode<T> newTail = new AwsmNode<>(null, null);
+    tail.next = newTail;
+    tail = newTail;
   }
 
   @Override
